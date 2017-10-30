@@ -1,76 +1,101 @@
-var canvas_y = 80;
-var canvas_x = 100;
-var canvas_top_overlay = 50;
-var canvas_bottom_underlay = 20;
+// Enemies our player must avoid
 
-var player_y_min = 0 * canvas_y + canvas_top_overlay;
-var player_y_max = 5 * canvas_y - canvas_bottom_underlay;
-var player_x_min = 0;
-var player_x_max = 4 * canvas_x;
-
-var player_sprite = 'images/char-boy.png';
-
-var start_loc_x = canvas_x * 2;
-var start_loc_y = canvas_y * 5 - canvas_bottom_underlay;
-
-var bug = 'images/enemy-bug.png';
-
-var npcMinSpd = 150;
-var npcMaxSpd = 500;
-
-var catalyst = function(x, y, img) {
-    this.x = x;
-    this.y = y;
-    this.sprite = img;
+var Enemy = function(x, y, speed) {
+	// Variables applied to each of our instances go here,// we've provided one for you to get started
+	this.x = x;
+	this.y = y;
+	this.speed = speed;
+	// The image/sprite for our enemies, this uses
+	// a helper we've provided to easily load images
+	this.sprite = 'images/enemy-bug.png';
 };
-catalyst.prototype.render = function() {
-    ctx.drawImage(resources.get(this.sprite), this.x, this.y);
-}
-var player = function(x, y) {
-    catalyst.call(this, x, y, player_sprite);
-};
-player.prototype = Object.create(Catalyst.prototype);
-player.prototype.constructor = Player;
-player.prototype.handleInput = function(keyCode) {
-    if (keyCode == 'up' && this.y > player_y_min) this.y = this.y - canvas_y;
-    else if (keyCode == 'down' && this.y < player_y_max) this.y = this.y + canvas_y;
-    else if (keyCode == 'left' && this.x > player_x_min) this.x = this.x - canvas_x;
-    else if (keyCode == 'right' && this.x < player_x_max) this.x = this.x + canvas_x;
-};
-player.prototype.update = function() {
-if (this.y <= canvas_top_overlay) {
-        this.x = start_loc_x;
-        this.y = start_loc_y;
-        this.sprite = player_sprite;
-    }
-};
-var enemy = function(x, y) {
-    catalyst.call(this, x, y, 'images/enemy-bug.png');
-    this.speed = getRandomInt(npcMinSpd, npcMaxSpd);
-};
-enemy.prototype = object.create(catalyst.prototype);
-enemy.prototype.constructor = enemy;
-enemy.prototype.update = function(dt) {
-if (this.x > canvas_x * 5) {
-        this.x = canvas_x * -1;
-        this.y = canvas_y * getRandomInt(1, 4) - var canvas_bottom_underlay;
-        this.speed = getRandomInt(npcMinSpd, npcMaxSpd);
-    }
-this.x = this.x + this.speed * dt;
-if (player.x >= this.x - 50 && player.x <= this.x + 50) {
-        if (player.y >= this.y - 50 && player.y <= this.y + 50) {
-            player.x = start_loc_x;
-            player.y = start_loc_y;
-        }
-    }
-};
-var player = new Player(start_loc_x, start_loc_y);
 
+// Now instantiate your objects.
+// Place all enemy objects in an array called allEnemies
+// Place the player object in a variable called player
 var allEnemies = [];
-for (var i = 0; i < npcSpawn; i++){
-    allEnemies.push(new Enemy(canvas_x * -1, canvas_y * getRandomInt(1, 4) - canvas_bottom_underlay));
-}
+var enemyPosition = [60, 140, 220];
+var player = new Player(200, 380, 50);
+var enemy;
 
+enemyPosition.forEach(function(posY) {
+	enemy = new Enemy(0, posY, 100 + Math.floor(Math.random() * 512));
+	allEnemies.push(enemy);
+});
+
+// Update the enemy's position, required method for game
+// Parameter: dt, a time delta between ticks
+
+Enemy.prototype.update = function(dt) {
+// You should multiply any movement by the dt parameter// which will ensure the game runs at the same speed for// all computers.
+	this.x += this.speed * dt;
+	// when off canvas, reset position of enemy to move across again
+	if (this.x > 550) {
+		this.x = -100;
+		this.speed = 100 + Math.floor(Math.random() * 512);
+	}
+	// Check for collision between player and enemies
+	if (player.x < this.x + 60 && player.x + 37 > this.x && player.y < this.y + 25 && 30 + player.y > this.y) {
+		player.x = 200;
+		player.y = 380;
+	}
+};
+
+// Draw the enemy on the screen, required method for game
+Enemy.prototype.render = function() {
+	ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+// Now write your own player class// This class requires an update(), render() and// a handleInput() method.
+
+var Player = function(x, y, speed) {
+	this.x = x;
+	this.y = y;
+	this.speed = speed;
+	this.sprite = 'images/char-boy.png';
+};
+
+Player.prototype.update = function() {
+// Prevent player from moving beyond canvas wall boundaries
+	if (this.y > 380) {
+		this.y = 380;
+	}
+	if (this.x > 400) {
+		this.x = 400;
+	}
+	if (this.x < 0) {
+		this.x = 0;
+	}
+	// Check for player reaching top of canvas and winning the game
+	if (this.y < 0) {
+		this.x = 200;
+		this.y = 380;
+	}
+};
+
+Player.prototype.render = function() {
+	ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+Player.prototype.handleInput = function(keyPress) {
+	if (keyPress == 'left'){
+		this.x -= this.speed + 20;
+	}
+	if (keyPress == 'right'){
+		this.x += this.speed + 20;
+	}
+	if (keyPress == 'up'){
+		this.y -= this.speed + 10;
+	}
+	if (keyPress == 'down'){
+		this.y += this.speed + 10;
+	}
+	
+};
+
+
+// This listens for key presses and sends the keys to your
+// Player.handleInput() method. You don't need to modify this.
 document.addEventListener('keyup', function(e) {
     var allowedKeys = {
         37: 'left',
