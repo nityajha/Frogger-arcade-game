@@ -15,7 +15,6 @@ var Enemy = function(x, y, speed) {
 // Place the player object in a variable called player
 var allEnemies = [];
 var enemyPosition = [60, 140, 220];
-var player = new Player(200, 380, 50);
 var enemy;
 
 enemyPosition.forEach(function(posY) {
@@ -55,6 +54,8 @@ var Player = function(x, y, speed) {
 	this.sprite = 'images/char-boy.png';
 };
 
+var player = new Player(200, 380, 50);
+
 Player.prototype.update = function() {
 // Prevent player from moving beyond canvas wall boundaries
 	if (this.y > 380) {
@@ -72,6 +73,7 @@ Player.prototype.update = function() {
 		this.y = 380;
 	}
 };
+
 
 Player.prototype.render = function() {
 	ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -97,12 +99,11 @@ Player.prototype.handleInput = function(keyPress) {
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
 document.addEventListener('keyup', function(e) {
-    var allowedKeys = {
-        37: 'left',
-        38: 'up',
-        39: 'right',
-        40: 'down'
-    };
-
-    player.handleInput(allowedKeys[e.keyCode]);
+	var allowedKeys = {
+		37: 'left',
+		38: 'up',
+		39: 'right',
+		40: 'down'
+	};
+	player.handleInput(allowedKeys[e.keyCode]);
 });
