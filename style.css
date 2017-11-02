@@ -1,3 +1,7 @@
 body {
-    text-align: center;
+	text-align: center;
+	background-color: darkolivegreen;
+}
+.instruction{
+	text-align: center;
 }
